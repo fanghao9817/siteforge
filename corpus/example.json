@@ -1,0 +1,16 @@
+{
+  "note": "Corpus format for the batch benchmark. Supply your own targets: npm run clone -- corpus/example.json <tag>",
+  "count": 2,
+  "sites": [
+    {
+      "url": "https://your-first-target.example/",
+      "vertical": "auto glass repair",
+      "platform": "wordpress"
+    },
+    {
+      "url": "https://your-second-target.example/",
+      "vertical": "dental clinic",
+      "platform": "wix"
+    }
+  ]
+}

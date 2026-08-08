@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SiteForge 后管</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#fff; --text:#1a1c21; --muted:#6b7280; --border:#e4e7ec;
+  --primary:#2563eb; --primary-dark:#1e4fd0; --danger:#dc2626; --ok:#16a34a; --warn:#d97706;
+  --radius:10px; --shadow:0 1px 3px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--primary);text-decoration:none}
+button{font:inherit;cursor:pointer;border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px 14px;transition:.12s}
+button:hover{border-color:var(--primary);color:var(--primary)}
+button.pri{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+button.pri:hover{background:var(--primary-dark)}
+button.danger{color:var(--danger);border-color:#fecaca}
+button.danger:hover{background:#fef2f2;border-color:var(--danger)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{font:inherit;width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:#fff;color:var(--text)}
+input:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:var(--primary)}
+textarea{resize:vertical;min-height:70px}
+label{display:block;font-weight:600;font-size:13px;margin:12px 0 4px;color:#374151}
+label small{font-weight:400;color:var(--muted)}
+.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:0 22px;height:52px}
+.topbar .logo{font-weight:800;font-size:16px}
+.topbar .logo span{color:var(--primary)}
+.topbar nav{display:flex;gap:4px}
+.topbar nav a{padding:6px 12px;border-radius:8px;color:var(--muted);font-weight:600}
+.topbar nav a.on{background:#eff6ff;color:var(--primary)}
+.wrap{max-width:1280px;margin:0 auto;padding:22px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;margin-top:14px}
+.site-card{display:flex;flex-direction:column;gap:8px}
+.site-card .colors{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.site-card .colors i{flex:1}
+.site-card h3{font-size:16px}
+.site-card .meta{color:var(--muted);font-size:12px;word-break:break-all}
+.site-card .actions{display:flex;gap:8px;margin-top:6px}
+.badge{display:inline-block;background:#eff6ff;color:var(--primary);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700}
+.badge.warn{background:#fef3c7;color:var(--warn)}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+.row .fix{flex:0 0 auto}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:80vw}
+.toast.show{opacity:.95}
+.editor{display:grid;grid-template-columns:460px 1fr;gap:16px;align-items:start}
+@media(max-width:960px){.editor{grid-template-columns:1fr}}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap}
+.tabs button{border:none;border-radius:8px 8px 0 0;padding:8px 14px;color:var(--muted);font-weight:600;background:none}
+.tabs button.on{color:var(--primary);background:#eff6ff}
+.preview-box{position:sticky;top:66px}
+.preview-box iframe{width:100%;height:calc(100vh - 130px);border:1px solid var(--border);border-radius:var(--radius);background:#fff}
+.svc{border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;background:#fafbfc}
+.svc .row{margin-bottom:6px}
+.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.swatches i{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);cursor:pointer;display:inline-block}
+.swatches i:hover{outline:2px solid var(--primary)}
+.color-row{display:grid;grid-template-columns:110px 44px 1fr;gap:8px;align-items:center;margin-bottom:6px}
+.color-row input[type=color]{padding:2px;height:32px;width:44px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+tr:hover td{background:#fafbfc}
+.log{background:#0f172a;color:#cbd5e1;font:12px/1.5 ui-monospace,Consolas,monospace;border-radius:8px;padding:12px;white-space:pre-wrap;max-height:280px;overflow:auto}
+.imgthumb{max-height:64px;max-width:180px;border:1px solid var(--border);border-radius:6px;background:#f3f4f6;padding:2px}
+.hint{color:var(--muted);font-size:12px;margin-top:4px}
+.kpis{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+.kpi{background:#fafbfc;border:1px solid var(--border);border-radius:8px;padding:8px 14px}
+.kpi b{font-size:18px}
+.kpi span{display:block;color:var(--muted);font-size:12px}
+.ok{color:var(--ok)}.bad{color:var(--danger)}
+.section-title{font-size:15px;font-weight:700;margin:18px 0 6px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">Site<span>Forge</span> 后管</div>
+  <nav id="nav">
+    <a href="#/" data-r="sites">站点</a>
+    <a href="#/runs" data-r="runs">跑批质量</a>
+    <a href="#/audit" data-r="audit">审计</a>
+  </nav>
+</div>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => [...(el || document).querySelectorAll(s)];
+const app = $('#app');
+let token = localStorage.sfToken || '';
+
+// ---------- 基础设施 ----------
+function toast(msg, ms) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), ms || 2600);
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+async function api(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ 'content-type': 'application/json' }, opts.headers || {});
+  if (token) opts.headers.authorization = 'Bearer ' + token;
+  const res = await fetch(path, opts);
+  if (res.status === 401) {
+    const t = prompt('需要后台口令(SF_ADMIN_TOKEN):');
+    if (t) {
+      token = t.trim();
+      localStorage.sfToken = token;
+      return api(path, opts);
+    }
+    throw new Error('未授权');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return isNaN(d) ? '—' : d.toLocaleString('zh-CN', { hour12: false });
+}
+function pct(x) { return x == null ? '—' : (x * 100).toFixed(1) + '%'; }
+
+// 颜色工具:从候选色一键设主色时派生 primaryDark / onPrimary
+function hexRgb(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function rgbHex(r) { return '#' + r.map(n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0')).join(''); }
+function lum(h) { const [r, g, b] = hexRgb(h); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; }
+function darken(h, t) { const [r, g, b] = hexRgb(h); return rgbHex([r * (1 - t), g * (1 - t), b * (1 - t)]); }
+
+// ---------- 路由 ----------
+function route() {
+  const h = location.hash || '#/';
+  const m = h.match(/^#\/site\/([a-z0-9-]+)/);
+  $$('#nav a').forEach(a => a.classList.remove('on'));
+  if (m) { viewEditor(m[1]); }
+  else if (h.startsWith('#/runs')) { markNav('runs'); viewRuns(h.split('/')[2] || ''); }
+  else if (h.startsWith('#/audit')) { markNav('audit'); viewAudit(); }
+  else { markNav('sites'); viewSites(); }
+}
+function markNav(r) { const a = $('#nav a[data-r="' + r + '"]'); if (a) a.classList.add('on'); }
+window.addEventListener('hashchange', route);
+
+// ---------- 站点列表 ----------
+let jobTimer = null;
+async function viewSites() {
+  clearInterval(jobTimer);
+  app.innerHTML = '<div class="card"><h2 style="margin-bottom:10px">➕ 从客户网址新建站点</h2>' +
+    '<div class="row"><input id="new-url" placeholder="https://客户现有网站.com"><input id="new-slug" placeholder="slug(可选,默认取域名)" style="max-width:220px"><button class="pri fix" id="new-btn">生成预览站</button></div>' +
+    '<div class="hint">流程:无头渲染 → 抽内容+品牌 → 生成静态站。约 30~90 秒,任务排队执行(渲染机内存有限,一次一个)。</div>' +
+    '<div id="jobs-box" style="margin-top:12px"></div></div>' +
+    '<div id="sites-box"><div class="empty">加载中…</div></div>';
+  $('#new-btn').onclick = async () => {
+    const url = $('#new-url').value.trim();
+    if (!/^https?:\/\//.test(url)) return toast('请输入以 http(s):// 开头的完整网址');
+    try {
+      const r = await api('/api/sites', { method: 'POST', body: JSON.stringify({ url, slug: $('#new-slug').value.trim() || undefined }) });
+      toast('任务已入队: ' + r.job.slug);
+      pollJobs();
+    } catch (e) { toast('❌ ' + e.message); }
+  };
+  pollJobs();
+  await renderSiteList();
+}
+async function renderSiteList() {
+  try {
+    const { sites } = await api('/api/sites');
+    const box = $('#sites-box');
+    if (!box) return;
+    if (!sites.length) { box.innerHTML = '<div class="empty">还没有站点。输入一个客户网址开始。</div>'; return; }
+    box.innerHTML = '<div class="grid">' + sites.map(x => {
+      const c = x.colors || {};
+      return '<div class="card site-card">' +
+        '<div class="colors">' + ['primary', 'primaryDark', 'bg', 'surface', 'text'].map(k => '<i style="background:' + esc(c[k] || '#eee') + '"></i>').join('') + '</div>' +
+        '<h3>' + esc(x.brandName) + ' ' + (x.leads ? '<span class="badge">' + x.leads + ' 询盘</span>' : '') + '</h3>' +
+        '<div class="meta">slug: ' + esc(x.slug) + '<br>来源: ' + esc(x.sourceUrl || '—') + '<br>构建: ' + fmtTime(x.builtAt) + (x.baseUrl ? '<br>域名: ' + esc(x.baseUrl) : '') + '</div>' +
+        '<div class="actions"><button class="pri" onclick="location.hash=\'#/site/' + esc(x.slug) + '\'">管理</button>' +
+        '<button onclick="window.open(\'/sites/' + esc(x.slug) + '/\')">预览 ↗</button></div></div>';
+    }).join('') + '</div>';
+  } catch (e) {
+    const box = $('#sites-box');
+    if (box) box.innerHTML = '<div class="empty">❌ ' + esc(e.message) + '</div>';
+  }
+}
+async function pollJobs() {
+  clearInterval(jobTimer);
+  const tick = async () => {
+    const box = $('#jobs-box');
+    if (!box) { clearInterval(jobTimer); return; }
+    try {
+      const { jobs } = await api('/api/jobs');
+      const act = jobs.filter(j => j.status === 'queued' || j.status === 'running');
+      const recent = jobs.slice(0, 5);
+      if (!recent.length) { box.innerHTML = ''; clearInterval(jobTimer); return; }
+      let html = '<table><tr><th>任务</th><th>站点</th><th>状态</th><th>开始</th></tr>' + recent.map(j =>
+        '<tr><td>' + (j.type === 'create' ? '新建' : '重抓') + '</td><td>' + esc(j.slug) + '</td><td>' +
+        (j.status === 'done' ? '<span class="ok">✅ 完成</span>' : j.status === 'error' ? '<span class="bad">❌ 失败</span>' : j.status === 'running' ? '⏳ 进行中' : '🕐 排队') +
+        ' <a href="javascript:void 0" onclick="showJobLog(\'' + esc(j.id) + '\')">日志</a></td><td>' + fmtTime(j.startedAt) + '</td></tr>').join('') + '</table><div id="job-log"></div>';
+      box.innerHTML = html;
+      if (!act.length) { clearInterval(jobTimer); renderSiteList(); }
+    } catch (e) { /* 静默重试 */ }
+  };
+  await tick();
+  jobTimer = setInterval(tick, 2500);
+}
+window.showJobLog = async (id) => {
+  try {
+    const { job } = await api('/api/jobs/' + id);
+    const el = $('#job-log');
+    if (el) el.innerHTML = '<div class="log" style="margin-top:8px">' + esc(job.log || '(空)') + '</div>';
+  } catch (e) { toast('❌ ' + e.message); }
+};
+
+// ---------- 站点编辑器 ----------
+let ed = null; // {slug, content, theme, meta, seo, tab}
+async function viewEditor(slug) {
+  app.innerHTML = '<div class="empty">加载中…</div>';
+  let d;
+  try { d = await api('/api/sites/' + slug); }
+  catch (e) { app.innerHTML = '<div class="empty">❌ ' + esc(e.message) + ' <a href="#/">返回</a></div>'; return; }
+  ed = { slug, content: d.content, theme: d.theme, meta: d.meta, seo: d.seo, leads: d.leads, tab: (ed && ed.slug === slug ? ed.tab : 'content') };
+  app.innerHTML =
+    '<div class="row" style="margin-bottom:14px"><div class="fix"><a href="#/">← 站点列表</a></div>' +
+    '<h2 style="flex:1">' + esc(ed.content.brandName) + ' <small style="color:var(--muted);font-weight:400">sites/' + esc(slug) + '</small></h2>' +
+    '<div class="fix"><button onclick="window.open(\'/sites/' + esc(slug) + '/\')">新窗口预览 ↗</button> ' +
+    '<button class="pri" id="save-btn">💾 保存并重建</button></div></div>' +
+    '<div class="editor"><div class="card" id="panel"></div>' +
+    '<div class="preview-box"><iframe id="pv" src="/sites/' + esc(slug) + '/?v=' + Date.now() + '"></iframe></div></div>';
+  $('#save-btn').onclick = saveAll;
+  renderPanel();
+}
+function reloadPreview() { const f = $('#pv'); if (f) f.src = '/sites/' + ed.slug + '/?v=' + Date.now(); }
+async function saveAll() {
+  const btn = $('#save-btn');
+  btn.disabled = true;
+  try {
+    await api('/api/sites/' + ed.slug + '/content', { method: 'PUT', body: JSON.stringify(ed.content) });
+    await api('/api/sites/' + ed.slug + '/theme', { method: 'PUT', body: JSON.stringify(ed.theme) });
+    await api('/api/sites/' + ed.slug + '/meta', { method: 'PUT', body: JSON.stringify(ed.meta) });
+    toast('✅ 已保存并重建');
+    reloadPreview();
+  } catch (e) { toast('❌ ' + e.message); }
+  btn.disabled = false;
+}
+function renderPanel() {
+  const p = $('#panel');
+  const T = ed.tab;
+  p.innerHTML = '<div class="tabs">' +
+    [['content', '内容'], ['theme', '品牌主题'], ['seo', 'SEO/发布'], ['leads', '询盘' + (ed.leads ? ' (' + ed.leads + ')' : '')], ['adv', '高级']]
+      .map(([k, n]) => '<button class="' + (T === k ? 'on' : '') + '" onclick="edTab(\'' + k + '\')">' + n + '</button>').join('') + '</div><div id="tabbody"></div>';
+  const b = $('#tabbody');
+  if (T === 'content') renderContentTab(b);
+  else if (T === 'theme') renderThemeTab(b);
+  else if (T === 'seo') renderSeoTab(b);
+  else if (T === 'leads') renderLeadsTab(b);
+  else renderAdvTab(b);
+}
+window.edTab = (t) => { ed.tab = t; renderPanel(); };
+
+function bind(el, obj, key) {
+  el.value = obj[key] || '';
+  el.oninput = () => { obj[key] = el.value; };
+}
+function renderContentTab(b) {
+  const c = ed.content;
+  b.innerHTML =
+    '<label>品牌名</label><input id="f-brand">' +
+    '<label>标语 tagline <small>(首屏副标题,建议 ≤60 字)</small></label><input id="f-tag">' +
+    '<label>关于 about</label><textarea id="f-about" rows="4"></textarea>' +
+    '<label>联系电话</label><input id="f-phone">' +
+    '<label>邮箱</label><input id="f-email">' +
+    '<label>地址</label><input id="f-addr">' +
+    '<label>营业时间</label><input id="f-hours">' +
+    '<div class="section-title">服务项目 <button class="fix" style="font-size:12px;padding:3px 10px" onclick="svcAdd()">+ 添加</button></div><div id="svc-box"></div>' +
+    '<div class="section-title">品牌图片</div><div id="img-box"></div>';
+  bind($('#f-brand'), c, 'brandName');
+  bind($('#f-tag'), c, 'tagline');
+  bind($('#f-about'), c, 'about');
+  bind($('#f-phone'), c.contacts, 'phone');
+  bind($('#f-email'), c.contacts, 'email');
+  bind($('#f-addr'), c.contacts, 'address');
+  bind($('#f-hours'), c.contacts, 'hours');
+  renderSvc();
+  renderImgs();
+}
+function renderSvc() {
+  const box = $('#svc-box');
+  box.innerHTML = ed.content.services.map((sv, i) =>
+    '<div class="svc"><div class="row"><input value="' + esc(sv.title) + '" placeholder="服务名" oninput="ed.content.services[' + i + '].title=this.value">' +
+    '<button class="danger fix" onclick="svcDel(' + i + ')">删</button></div>' +
+    '<input value="' + esc(sv.description) + '" placeholder="一句话描述(可空)" oninput="ed.content.services[' + i + '].description=this.value"></div>').join('') ||
+    '<div class="hint">暂无服务项。点“+ 添加”。</div>';
+}
+window.svcAdd = () => { ed.content.services.push({ title: '', description: '' }); renderSvc(); };
+window.svcDel = (i) => { ed.content.services.splice(i, 1); renderSvc(); };
+function renderImgs() {
+  const box = $('#img-box');
+  const img = (kind, label) => {
+    const v = ed.content[kind];
+    return '<label>' + label + '</label><div class="row">' +
+      (v ? '<img class="imgthumb fix" src="/sites/' + esc(ed.slug) + '/' + esc(v) + '?v=' + Date.now() + '">' : '<span class="hint fix">(无)</span>') +
+      '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="upAsset(\'' + kind + '\', this)"></div>';
+  };
+  box.innerHTML = img('logo', 'Logo') + img('hero', '首屏大图 Hero');
+}
+window.upAsset = (kind, input) => {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  if (f.size > 8 * 1024 * 1024) return toast('图片需 ≤8MB');
+  const r = new FileReader();
+  r.onload = async () => {
+    try {
+      const resp = await api('/api/sites/' + ed.slug + '/asset', { method: 'POST', body: JSON.stringify({ kind, dataUrl: r.result }) });
+      ed.content[kind] = resp.path;
+      toast('✅ 已替换并重建');
+      renderImgs();
+      reloadPreview();
+    } catch (e) { toast('❌ ' + e.message); }
+  };
+  r.readAsDataURL(f);
+};
+
+function renderThemeTab(b) {
+  const t = ed.theme;
+  const NAMES = { primary: '主色', primaryDark: '主色深', onPrimary: '主色上文字', bg: '背景', surface: '卡片底', text: '正文', textMuted: '次要文字', border: '边框' };
+  b.innerHTML =
+    '<div class="section-title">品牌色</div>' +
+    Object.keys(NAMES).map(k =>
+      '<div class="color-row"><span>' + NAMES[k] + '</span><input type="color" value="' + esc(t.colors[k]) + '" oninput="setColor(\'' + k + '\', this.value)">' +
+      '<input id="ct-' + k + '" value="' + esc(t.colors[k]) + '" oninput="setColor(\'' + k + '\', this.value)"></div>').join('') +
+    '<label>抓取到的候选强调色 <small>(点击一键设为主色,自动派生深色与文字色)</small></label>' +
+    '<div class="swatches">' + (t.source && t.source.accents || []).map(h => '<i style="background:' + esc(h) + '" title="' + esc(h) + '" onclick="pickPrimary(\'' + esc(h) + '\')"></i>').join('') + '</div>' +
+    '<label>候选背景色</label>' +
+    '<div class="swatches">' + (t.source && t.source.backgrounds || []).map(h => '<i style="background:' + esc(h) + '" title="' + esc(h) + '" onclick="setColor(\'bg\',\'' + esc(h) + '\')"></i>').join('') + '</div>' +
+    '<div class="section-title">字体</div>' +
+    '<label>标题字体</label><input id="f-fh"><label>正文字体</label><input id="f-fb">' +
+    '<div class="hint">改完点右上「保存并重建」生效。</div>';
+  bind($('#f-fh'), t.fonts, 'heading');
+  bind($('#f-fb'), t.fonts, 'body');
+}
+window.setColor = (k, v) => {
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+    ed.theme.colors[k] = v.toLowerCase();
+    const tEl = $('#ct-' + k);
+    if (tEl && tEl.value !== v) tEl.value = v;
+  }
+};
+window.pickPrimary = (h) => {
+  ed.theme.colors.primary = h;
+  ed.theme.colors.primaryDark = darken(h, 0.16);
+  ed.theme.colors.onPrimary = lum(h) > 0.55 ? '#16181d' : '#ffffff';
+  renderPanel();
+};
+
+function renderSeoTab(b) {
+  const seo = ed.seo || {};
+  const chk = (v, name) => '<div>' + (v ? '<span class="ok">✅</span>' : '<span class="bad">✗</span>') + ' ' + name + '</div>';
+  b.innerHTML =
+    '<label>正式域名 baseUrl <small>(用于 canonical / og:url / sitemap;发布前必填)</small></label><input id="f-base" placeholder="https://www.example.com">' +
+    '<label>询盘表单</label><div class="row"><select id="f-form"><option value="0">关闭</option><option value="1">开启(生成站带联系表单)</option></select></div>' +
+    '<div class="hint">表单提交到本后台 /api/leads/' + esc(ed.slug) + ',在「询盘」页查看。</div>' +
+    '<label>运营备注</label><textarea id="f-notes" rows="3"></textarea>' +
+    '<div class="section-title">SEO 自检(当前 index.html)</div>' +
+    '<div class="kpis"><div class="kpi"><b>' + (seo.visibleTextLen || 0) + '</b><span>可见文字量</span></div></div>' +
+    chk(seo.hasH1, '<h1> 主标题') + chk(seo.hasDescription, 'meta description') + chk(seo.hasJsonLd, 'JSON-LD 结构化数据') +
+    chk(seo.hasOgImage, 'og:image') + chk(seo.hasCanonical, 'canonical(需 baseUrl + 重建)') +
+    '<div class="hint" style="margin-top:6px">标题: ' + esc(seo.title || '—') + '</div>';
+  bind($('#f-base'), ed.meta, 'baseUrl');
+  bind($('#f-notes'), ed.meta, 'notes');
+  const f = $('#f-form');
+  f.value = ed.meta.formEnabled ? '1' : '0';
+  f.onchange = () => { ed.meta.formEnabled = f.value === '1'; };
+}
+
+async function renderLeadsTab(b) {
+  b.innerHTML = '<div class="empty">加载中…</div>';
+  try {
+    const { leads } = await api('/api/sites/' + ed.slug + '/leads');
+    const seen = ed.meta.leadsSeenAt || '';
+    b.innerHTML =
+      '<div class="row" style="margin-bottom:8px"><div>共 ' + leads.length + ' 条</div><button class="fix" onclick="markLeadsSeen()">全部标为已读</button></div>' +
+      (leads.length ? '<table><tr><th>时间</th><th>联系人</th><th>留言</th></tr>' + leads.map(l =>
+        '<tr' + (l.ts > seen ? ' style="font-weight:600"' : '') + '><td style="white-space:nowrap">' + fmtTime(l.ts) + (l.ts > seen ? ' <span class="badge warn">新</span>' : '') + '</td>' +
+        '<td>' + esc(l.name || '—') + '<br><small>' + esc(l.phone || '') + ' ' + esc(l.email || '') + '</small></td>' +
+        '<td>' + esc(l.message || '') + '</td></tr>').join('') + '</table>'
+        : '<div class="empty">还没有询盘。开启表单并发布后,客户留言会出现在这里。</div>');
+  } catch (e) { b.innerHTML = '<div class="empty">❌ ' + esc(e.message) + '</div>'; }
+}
+window.markLeadsSeen = async () => {
+  ed.meta.leadsSeenAt = new Date().toISOString();
+  try {
+    await api('/api/sites/' + ed.slug + '/meta', { method: 'PUT', body: JSON.stringify(ed.meta) });
+    toast('✅ 已标记');
+    renderPanel();
+  } catch (e) { toast('❌ ' + e.message); }
+};
+
+function renderAdvTab(b) {
+  b.innerHTML =
+    '<div class="section-title">重新抓取源站</div>' +
+    '<div class="hint">从 ' + esc(ed.content.sourceUrl || '(无来源)') + ' 重新渲染抽取,<b>会覆盖当前内容与主题</b>。</div>' +
+    '<div style="margin-top:8px"><button onclick="refetchSite()">🔄 重新抓取</button></div><div id="refetch-log"></div>' +
+    '<div class="section-title">原始数据</div>' +
+    '<div><a href="/sites/' + esc(ed.slug) + '/content.json" target="_blank">content.json</a> · ' +
+    '<a href="/sites/' + esc(ed.slug) + '/theme.json" target="_blank">theme.json</a> · ' +
+    '<a href="/sites/' + esc(ed.slug) + '/capture.json" target="_blank">capture.json</a></div>' +
+    '<div class="section-title" style="color:var(--danger)">危险区</div>' +
+    '<button class="danger" onclick="delSite()">🗑 删除站点(移入回收站)</button>';
+}
+window.refetchSite = async () => {
+  if (!confirm('重新抓取会覆盖你手工编辑过的内容与主题,确定?')) return;
+  try {
+    const r = await api('/api/sites/' + ed.slug + '/refetch', { method: 'POST' });
+    toast('任务已入队');
+    const el = $('#refetch-log');
+    const timer = setInterval(async () => {
+      if (!document.contains(el)) return clearInterval(timer);
+      const { job } = await api('/api/jobs/' + r.job.id);
+      el.innerHTML = '<div class="log" style="margin-top:8px">' + esc(job.log || '…') + '</div>';
+      if (job.status === 'done' || job.status === 'error') {
+        clearInterval(timer);
+        toast(job.status === 'done' ? '✅ 重抓完成' : '❌ 重抓失败');
+        if (job.status === 'done') viewEditor(ed.slug);
+      }
+    }, 2500);
+  } catch (e) { toast('❌ ' + e.message); }
+};
+window.delSite = async () => {
+  if (prompt('输入 slug「' + ed.slug + '」确认删除:') !== ed.slug) return toast('已取消');
+  try {
+    await api('/api/sites/' + ed.slug, { method: 'DELETE' });
+    toast('✅ 已移入回收站 sites/.trash/');
+    location.hash = '#/';
+  } catch (e) { toast('❌ ' + e.message); }
+};
+
+// ---------- 跑批质量 ----------
+async function viewRuns(tag) {
+  app.innerHTML = '<div class="empty">加载中…</div>';
+  try {
+    if (!tag) {
+      const { runs } = await api('/api/runs');
+      app.innerHTML = '<div class="card"><h2>克隆跑批报告</h2><div class="hint">clone 轨(npm run clone)的像素保真评分。分数 = 对齐像素准确率 × 高度覆盖。</div>' +
+        (runs.length ? '<table style="margin-top:10px"><tr><th>批次</th><th>时间</th><th>成功/总数</th><th>均分</th><th>中位</th><th>p10</th><th></th></tr>' +
+          runs.map(r => '<tr><td><b>' + esc(r.tag) + '</b></td><td>' + fmtTime(r.mtime) + '</td><td>' + r.captured + '/' + r.total +
+            (r.failed ? ' <span class="bad">(' + r.failed + ' 失败)</span>' : '') + '</td><td>' + pct(r.meanScore) + '</td><td>' + pct(r.medianScore) + '</td><td>' + pct(r.p10Score) + '</td>' +
+            '<td><a href="#/runs/' + esc(r.tag) + '">明细 →</a></td></tr>').join('') + '</table>'
+          : '<div class="empty">还没有跑批。运行 npm run clone 生成。</div>') + '</div>';
+      return;
+    }
+    const { report } = await api('/api/runs/' + tag);
+    app.innerHTML = '<div class="card"><div class="row"><div class="fix"><a href="#/runs">← 跑批列表</a></div><h2 style="flex:1">批次 ' + esc(tag) + '</h2></div>' +
+      '<div class="kpis"><div class="kpi"><b>' + report.captured + '/' + report.total + '</b><span>捕获成功</span></div>' +
+      '<div class="kpi"><b>' + pct(report.meanScore) + '</b><span>均分</span></div>' +
+      '<div class="kpi"><b>' + pct(report.medianScore) + '</b><span>中位</span></div>' +
+      '<div class="kpi"><b>' + pct(report.p10Score) + '</b><span>p10</span></div></div>' +
+      '<div class="hint">按分数升序 —— 最上面的是最需要人工救的站。</div>' +
+      '<table style="margin-top:10px"><tr><th>站点</th><th>分数</th><th>对齐准确率</th><th>高度覆盖</th><th>资源</th><th>预览</th></tr>' +
+      report.results.map(r => '<tr><td>' + esc(r.slug) + '<br><small style="color:var(--muted)">' + esc(r.vertical || '') + ' · ' + esc(r.platform || '') + '</small></td>' +
+        (r.ok ? '<td><b>' + pct(r.score) + '</b></td><td>' + pct(r.alignedAccuracy) + '</td><td>' + pct(r.heightCoverage) + '</td><td>' + (r.assetsOk || 0) + '✓/' + (r.assetsFail || 0) + '✗</td>' +
+          '<td><a href="/runs-files/' + esc(tag) + '/' + esc(r.slug) + '/" target="_blank">克隆</a> · <a href="/runs-files/' + esc(tag) + '/' + esc(r.slug) + '/diff.png" target="_blank">diff</a></td>'
+          : '<td colspan="4" class="bad">❌ ' + esc(r.error || '失败') + '</td><td></td>') + '</tr>').join('') + '</table></div>';
+  } catch (e) { app.innerHTML = '<div class="empty">❌ ' + esc(e.message) + '</div>'; }
+}
+
+// ---------- 审计 ----------
+async function viewAudit() {
+  app.innerHTML = '<div class="empty">加载中…</div>';
+  try {
+    const { audit } = await api('/api/audit');
+    const NAME = { create: '新建', refetch: '重抓', rebuild: '重建', 'edit-content': '改内容', 'edit-theme': '改主题', 'edit-meta': '改设置', 'upload-asset': '传图', delete: '删除', lead: '询盘' };
+    app.innerHTML = '<div class="card"><h2>操作审计(最近 200 条)</h2>' +
+      (audit.length ? '<table style="margin-top:10px"><tr><th>时间</th><th>操作</th><th>站点</th><th>详情</th></tr>' +
+        audit.map(a => '<tr><td style="white-space:nowrap">' + fmtTime(a.ts) + '</td><td>' + esc(NAME[a.action] || a.action) + '</td><td>' + esc(a.slug) + '</td><td>' + esc(a.detail || '') + '</td></tr>').join('') + '</table>'
+        : '<div class="empty">暂无记录。</div>') + '</div>';
+  } catch (e) { app.innerHTML = '<div class="empty">❌ ' + esc(e.message) + '</div>'; }
+}
+
+route();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "siteforge",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "URL → 无头渲染 → 抽内容+品牌 → 生成 SEO 完整的静态站(SSG)。focus-ai 的下一代 onboarding。",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "forge": "node dist/index.js",
+    "dev": "tsc -p tsconfig.json && node dist/index.js",
+    "clone": "node dist/clone-loop.js",
+    "crawl": "node dist/crawl.js",
+    "admin": "node dist/admin/server.js",
+    "serve": "cd runs && python3 -m http.server 8123",
+    "clone-site": "node dist/clone-site.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "pixelmatch": "^5.3.0",
+    "playwright": "^1.48.0",
+    "pngjs": "^7.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

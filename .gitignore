@@ -1,0 +1,13 @@
+node_modules/
+dist/
+template/dist/
+# 生成产物(每个抓取站的内容/主题/图片,体积大、属数据不进 git)
+template/public/sites/
+*.log
+.DS_Store
+sites/
+runs/
+corpus/*.png
+proof/
+runs-*.log
+corpus/*.local.json
